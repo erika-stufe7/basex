@@ -57,58 +57,66 @@ Fast, CPU-optimized encoding tools with **zstd compression** for when you need t
 - **Result**: Typically 50-70% smaller than original, text-safe
 - **Use case**: Config files, CI/CD secrets, embedded data, URLs
 
-## Real-World Use Cases
+## 🎯 When to Use BaseX
 
-### 🎯 Where zbaseXX shines:
+**BaseX makes REAL sense for:**
 
-**1. Kubernetes & GitOps**
+✅ **JWT Tokens** - Compress large payloads (permissions, user metadata) by 80-90%  
+✅ **Kubernetes/Docker Secrets** - Daily DevOps work with ConfigMaps and Secrets  
+✅ **CI/CD Pipelines** - GitHub Actions, GitLab, Jenkins environment variables (256 KB limits)  
+✅ **Browser Storage** - PWAs, Offline-First Apps (localStorage 5 MB limit)  
+✅ **Message Queues** - Kafka, RabbitMQ, SQS payloads under size constraints  
+
+**Not the right tool for:**
+
+❌ **Standard REST/GraphQL APIs** - HTTP compression (gzip/brotli) handles this  
+❌ **Databases** - PostgreSQL JSONB, MongoDB BSON have native JSON support  
+❌ **File Archiving** - `tar.gz` is better for long-term storage  
+
+**Sweet Spot:** Anywhere JSON/text data must be **text-safe** encoded **AND** size limits exist! 🎯
+
+## Real-World Examples
+
+### 1. Kubernetes Secrets
 ```bash
-# Standard base64 secret (bloated)
-kubectl create secret generic mysecret --from-file=cert.pem
-# → 8KB becomes 11KB
+# Standard base64 (33% overhead)
+kubectl create secret generic api-config \
+  --from-literal=config=$(cat config.json | base64)
+# 50 KB JSON → 67 KB secret
 
-# With zbase85 (smart)
-zbase85 cert.pem | kubectl create secret generic mysecret --from-file=/dev/stdin
-# → 8KB becomes 4KB (50% smaller!)
+# With zbase122 (99% compression)
+kubectl create secret generic api-config \
+  --from-literal=config=$(cat config.json | zbase122)
+# 50 KB JSON → 500 bytes secret ✨
 ```
 
-**2. CI/CD Pipelines**
+### 2. CI/CD Environment Variables
 ```bash
-# GitHub Actions: Embed binary in environment variable
-zbase91 ./deployment-tool > $GITHUB_ENV
-# 10MB binary → 4MB text-safe (fits in env var limits)
+# GitHub Actions: Embed deployment config (256 KB env var limit)
+export DEPLOY_CONFIG=$(cat deploy.json | zbase122)
+# 200 KB JSON → 2 KB text-safe (fits easily!)
 ```
 
-**3. Self-Extracting Scripts**
+### 3. JWT Token Optimization
 ```bash
-#!/bin/bash
-# Embedded binary payload (compressed + encoded)
-PAYLOAD="$(cat << 'EOF'
-$(zbase85 large-binary)
-EOF
-)"
-echo "$PAYLOAD" | zbase85 -d > /tmp/binary && chmod +x /tmp/binary
+# Large JWT with many claims/permissions
+echo '{"sub":"user123","permissions":[...1000 items...],"metadata":{...}}' | zbase122
+# 5 KB payload → 500 bytes (10× smaller, still text-safe)
 ```
 
-**4. URLs & APIs**
+### 4. Message Queue Payloads
 ```bash
-# Compress data for URL parameters (especially useful for QR codes)
-DATA=$(zbase122 -19 report.json)  # Max compression
-curl "https://api.example.com/report?data=$DATA"
+# AWS SQS, Kafka: JSON messages under size limits
+cat event.json | zbase122 | aws sqs send-message --message-body -
+# 100 KB event → 1 KB message (under 256 KB SQS limit)
 ```
 
-**5. JSON/YAML Configs**
-```yaml
-# Terraform/Ansible: Embedded certificates without newline hell
-certificate: !base91 |
-  $(zbase91 -19 cert.pem)
-# Traditional base64: 2000 chars → zbase91: 800 chars
-```
-
-**6. Git Commit Messages / Notes**
-```bash
-# Attach build artifact to git commit
-git notes add -m "Binary: $(zbase122 output.bin)"
+### 5. Browser localStorage
+```javascript
+// PWA offline cache (5 MB localStorage limit)
+const data = JSON.stringify(largeDataset);
+localStorage.setItem('cache', zbase122(data));
+// 2 MB JSON → 20 KB cached (100× more data fits!)
 ```
 
 ## Features
