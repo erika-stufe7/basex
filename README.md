@@ -18,6 +18,25 @@ Fast, CPU-optimized encoding tools with **zstd compression** for when you need t
 - **CPU optimization**: Automatic AVX2/BMI2 acceleration → 5-8 GB/s throughput
 - **Drop-in compatibility**: Same CLI as `base64`/`base32`
 
+## ⚡ Quick Decision Guide
+
+**Use `zbase*` (compression + encoding) when:**
+- ✅ Text data: JSON, YAML, logs, configs → **99% smaller**
+- ✅ Source code: Git repos, artifacts → **82% smaller**
+- ✅ Compressible binaries: executables, images → **60-80% smaller**
+
+**Use pure `base*` (encoding only) when:**
+- ✅ Random data: encryption keys, hashes, tokens
+- ✅ Already compressed: .gz, .zip, .tar.gz files
+- ✅ Need RFC compatibility: base64/base32 for legacy systems
+
+**Real numbers (tested):**
+- 44 KB text file: base64 = 60 KB, **zbase122 = 341 bytes** (99.4% savings)
+- 11 KB source code: base64 = 15 KB, **zbase122 = 2.7 KB** (82% savings)
+- 51 KB random binary: base64 = 69 KB, **base122 = 59 KB** (15% savings)
+
+[See full benchmarks →](BENCHMARKS.md)
+
 ## Tools Overview
 
 ### Pure Encoding (like base64, but better)
