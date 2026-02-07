@@ -8,8 +8,9 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <zstd.h>
+#include <stdbool.h>
 
-#define BUFFER_SIZE (1024 * 1024)
+#define CHUNK_SIZE (128 * 1024)
 
 static void print_usage(const char* prog) {
     printf("Usage: %s [OPTION]... [FILE]\n", prog);
@@ -27,16 +28,18 @@ static void print_usage(const char* prog) {
 }
 
 static void print_version(void) {
-    printf("zbase64 (BaseX) %d.%d.%d\n", BASEX_VERSION_MAJOR, BASEX_VERSION_MINOR, BASEX_VERSION_PATCH);
+    printf("zbase64 (BaseX) %d.%d.%d with zstd %s\n", 
+           BASEX_VERSION_MAJOR, BASEX_VERSION_MINOR, BASEX_VERSION_PATCH,
+           ZSTD_versionString());
 }
 
 int main(int argc, char* argv[]) {
-    int decode_mode = 0;
+    bool decode_mode = false;
     int wrap = 76;
-    int ignore_garbage = 0;
+    bool ignore_garbage = false;
     int compression_level = 9;
     int threads = 0;
-    int verbose = 0;
+    bool verbose = false;
     const char* input_file = NULL;
     
     static struct option long_options[] = {
@@ -54,9 +57,9 @@ int main(int argc, char* argv[]) {
     int opt;
     while ((opt = getopt_long(argc, argv, "dw:il:T:vh", long_options, NULL)) != -1) {
         switch (opt) {
-            case 'd': decode_mode = 1; break;
+            case 'd': decode_mode = true; break;
             case 'w': wrap = atoi(optarg); break;
-            case 'i': ignore_garbage = 1; break;
+            case 'i': ignore_garbage = true; break;
             case 'l': 
                 compression_level = atoi(optarg);
                 if (compression_level < 1 || compression_level > 19) {
@@ -65,7 +68,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             case 'T': threads = atoi(optarg); break;
-            case 'v': verbose = 1; break;
+            case 'v': verbose = true; break;
             case 'V': print_version(); return 0;
             case 'h': print_usage(argv[0]); return 0;
             default: print_usage(argv[0]); return 1;
@@ -85,68 +88,96 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    uint8_t* buffer = malloc(BUFFER_SIZE);
-    if (!buffer) {
-        perror("malloc");
-        if (input != stdin) fclose(input);
-        return 1;
-    }
-    
     if (!decode_mode) {
-        size_t input_len = fread(buffer, 1, BUFFER_SIZE, input);
+        // ENCODE MODE: Read all input, compress once, then encode
         
-        size_t compressed_bound = ZSTD_compressBound(input_len);
+        // Read all input data into memory
+        size_t buffer_capacity = CHUNK_SIZE;
+        size_t buffer_size = 0;
+        uint8_t* buffer = malloc(buffer_capacity);
+        if (!buffer) {
+            perror("malloc");
+            if (input != stdin) fclose(input);
+            return 1;
+        }
+        
+        while (1) {
+            if (buffer_size >= buffer_capacity) {
+                buffer_capacity *= 2;
+                uint8_t* new_buffer = realloc(buffer, buffer_capacity);
+                if (!new_buffer) {
+                    perror("realloc");
+                    free(buffer);
+                    if (input != stdin) fclose(input);
+                    return 1;
+                }
+                buffer = new_buffer;
+            }
+            
+            size_t bytes_read = fread(buffer + buffer_size, 1, buffer_capacity - buffer_size, input);
+            if (bytes_read == 0) break;
+            buffer_size += bytes_read;
+        }
+        
+        // Compress the entire input
+        size_t compressed_bound = ZSTD_compressBound(buffer_size);
         uint8_t* compressed = malloc(compressed_bound);
         if (!compressed) {
-            perror("malloc");
+            perror("malloc compressed");
             free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
         ZSTD_CCtx* cctx = ZSTD_createCCtx();
-        if (threads > 0) {
+        ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, compression_level);
+        if (threads > 0 || threads == 0) {
             ZSTD_CCtx_setParameter(cctx, ZSTD_c_nbWorkers, threads);
         }
         
-        size_t compressed_size = ZSTD_compressCCtx(cctx, compressed, compressed_bound, 
-                                                     buffer, input_len, compression_level);
+        size_t compressed_size = ZSTD_compressCCtx(cctx, compressed, compressed_bound,
+                                                     buffer, buffer_size, compression_level);
         ZSTD_freeCCtx(cctx);
+        free(buffer);
         
         if (ZSTD_isError(compressed_size)) {
-            fprintf(stderr, "Compression error: %s\n", ZSTD_getErrorName(compressed_size));
+            fprintf(stderr, "zstd compression error: %s\n", ZSTD_getErrorName(compressed_size));
             free(compressed);
-            free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
+        // Base64 encode the compressed data
         size_t encoded_len = basex_base64_encode_len(compressed_size);
         char* encoded = malloc(encoded_len + 1);
         if (!encoded) {
-            perror("malloc");
+            perror("malloc encoded");
             free(compressed);
-            free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
         ssize_t result = basex_base64_encode(compressed, compressed_size, encoded);
+        free(compressed);
+        
         if (result < 0) {
-            fprintf(stderr, "Encoding error\n");
+            fprintf(stderr, "Base64 encoding error\n");
             free(encoded);
-            free(compressed);
-            free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
+        // Write with line wrapping
         if (wrap > 0) {
-            for (size_t i = 0; i < (size_t)result; i++) {
+            for (ssize_t i = 0; i < result; i++) {
                 putchar(encoded[i]);
-                if ((i + 1) % wrap == 0) putchar('\n');
+                if ((i + 1) % wrap == 0) {
+                    putchar('\n');
+                }
             }
-            if (result % wrap != 0) putchar('\n');
+            if (result % wrap != 0) {
+                putchar('\n');
+            }
         } else {
             fwrite(encoded, 1, result, stdout);
             putchar('\n');
@@ -154,81 +185,115 @@ int main(int argc, char* argv[]) {
         
         if (verbose) {
             fprintf(stderr, "Input: %zu bytes → Compressed: %zu bytes (%.1f%%) → Encoded: %zd bytes\n",
-                    input_len, compressed_size, 
-                    (100.0 * compressed_size) / input_len,
+                    buffer_size, compressed_size,
+                    (100.0 * compressed_size) / buffer_size,
                     result);
         }
         
         free(encoded);
-        free(compressed);
-    } else {
-        size_t input_len = fread(buffer, 1, BUFFER_SIZE, input);
         
-        char* filtered = malloc(input_len);
+    } else {
+        // DECODE MODE: Read all encoded input, decode, then decompress
+        
+        // Read all encoded input
+        size_t buffer_capacity = CHUNK_SIZE;
+        size_t buffer_size = 0;
+        char* buffer = malloc(buffer_capacity);
+        if (!buffer) {
+            perror("malloc");
+            if (input != stdin) fclose(input);
+            return 1;
+        }
+        
+        while (1) {
+            if (buffer_size >= buffer_capacity) {
+                buffer_capacity *= 2;
+                char* new_buffer = realloc(buffer, buffer_capacity);
+                if (!new_buffer) {
+                    perror("realloc");
+                    free(buffer);
+                    if (input != stdin) fclose(input);
+                    return 1;
+                }
+                buffer = new_buffer;
+            }
+            
+            size_t bytes_read = fread(buffer + buffer_size, 1, buffer_capacity - buffer_size, input);
+            if (bytes_read == 0) break;
+            buffer_size += bytes_read;
+        }
+        
+        // Filter whitespace
         size_t filtered_len = 0;
-        for (size_t i = 0; i < input_len; i++) {
+        for (size_t i = 0; i < buffer_size; i++) {
             if (!isspace((unsigned char)buffer[i])) {
-                filtered[filtered_len++] = buffer[i];
+                buffer[filtered_len++] = buffer[i];
             }
         }
         
+        // Base64 decode
         size_t decoded_len = basex_base64_decode_len(filtered_len);
         uint8_t* decoded = malloc(decoded_len);
         if (!decoded) {
-            perror("malloc");
-            free(filtered);
+            perror("malloc decoded");
             free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
-        ssize_t result = basex_base64_decode(filtered, filtered_len, decoded);
-        free(filtered);
+        ssize_t result = basex_base64_decode(buffer, filtered_len, decoded);
+        free(buffer);
         
         if (result < 0) {
-            fprintf(stderr, "Decoding error\n");
+            fprintf(stderr, "Base64 decoding error\n");
             free(decoded);
-            free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
-        size_t decompressed_bound = BUFFER_SIZE;
-        uint8_t* decompressed = malloc(decompressed_bound);
-        if (!decompressed) {
-            perror("malloc");
+        // Decompress
+        unsigned long long decompressed_size = ZSTD_getFrameContentSize(decoded, result);
+        if (decompressed_size == ZSTD_CONTENTSIZE_ERROR) {
+            fprintf(stderr, "Not compressed by zstd\n");
             free(decoded);
-            free(buffer);
+            if (input != stdin) fclose(input);
+            return 1;
+        }
+        if (decompressed_size == ZSTD_CONTENTSIZE_UNKNOWN) {
+            decompressed_size = result * 20;  // Estimate
+        }
+        
+        uint8_t* decompressed = malloc(decompressed_size);
+        if (!decompressed) {
+            perror("malloc decompressed");
+            free(decoded);
             if (input != stdin) fclose(input);
             return 1;
         }
         
         ZSTD_DCtx* dctx = ZSTD_createDCtx();
-        size_t decompressed_size = ZSTD_decompressDCtx(dctx, decompressed, decompressed_bound,
-                                                         decoded, result);
+        size_t decomp_result = ZSTD_decompressDCtx(dctx, decompressed, decompressed_size,
+                                                     decoded, result);
         ZSTD_freeDCtx(dctx);
+        free(decoded);
         
-        if (ZSTD_isError(decompressed_size)) {
-            fprintf(stderr, "Decompression error: %s\n", ZSTD_getErrorName(decompressed_size));
+        if (ZSTD_isError(decomp_result)) {
+            fprintf(stderr, "zstd decompression error: %s\n", ZSTD_getErrorName(decomp_result));
             free(decompressed);
-            free(decoded);
-            free(buffer);
             if (input != stdin) fclose(input);
             return 1;
         }
         
-        fwrite(decompressed, 1, decompressed_size, stdout);
+        fwrite(decompressed, 1, decomp_result, stdout);
         
         if (verbose) {
-            fprintf(stderr, "Encoded: %zu bytes → Decoded: %zd bytes → Decompressed: %zu bytes\n",
-                    filtered_len, result, decompressed_size);
+            fprintf(stderr, "Decoded: %zu bytes → Decompressed: %zu bytes\n",
+                    (size_t)result, decomp_result);
         }
         
         free(decompressed);
-        free(decoded);
     }
     
-    free(buffer);
     if (input != stdin) fclose(input);
     
     return 0;
