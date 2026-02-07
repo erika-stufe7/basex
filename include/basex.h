@@ -11,8 +11,8 @@ extern "C" {
 #endif
 
 /* Version information */
-#define BASEX_VERSION_MAJOR 1
-#define BASEX_VERSION_MINOR 0
+#define BASEX_VERSION_MAJOR 0
+#define BASEX_VERSION_MINOR 9
 #define BASEX_VERSION_PATCH 0
 
 /* CPU feature detection */

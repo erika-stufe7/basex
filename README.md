@@ -480,8 +480,6 @@ A: Currently Linux x86-64 only. PRs welcome for other platforms!
 - Base encoding algorithms (public domain)
 - CPU optimization inspired by [simdjson](https://github.com/simdjson/simdjson) patterns
 
-**Developed with** 🤖 **Claude Sonnet 4.5** - AI pair programming at its finest.
-
 **Design philosophy:** Unix tools should be fast, composable, and solve real problems. BaseX does that for the "compress + encode" pattern that's everywhere in modern infrastructure.
 
 ---
