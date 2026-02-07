@@ -13,7 +13,7 @@ Fast, CPU-optimized encoding tools with **zstd compression** for when you need t
 **The Problem:** Base64 is everywhere, but it's inefficient (33% overhead) and doesn't compress. When you need to embed binary data in text formats (JSON, YAML, env vars, Git, URLs), you're wasting 1/3 of your bandwidth.
 
 **The Solution:** BaseX provides:
-- **Better encodings**: Base85 (25%), Base91 (23%), Base122 (12.5% overhead)
+- **Better encodings**: Base32 (60%), Base64 (33%), Base85 (25%), Base91 (23%), Base122 (12.5% overhead)
 - **Compression + Encoding**: `zbase*` tools combine zstd with encoding → **50-70% size reduction**
 - **CPU optimization**: Automatic AVX2/BMI2 acceleration → 5-8 GB/s throughput
 - **Drop-in compatibility**: Same CLI as `base64`/`base32`
@@ -26,7 +26,9 @@ Fast, CPU-optimized encoding tools with **zstd compression** for when you need t
 - **base122**: 12.5% overhead, most efficient ASCII-safe encoding
 
 ### Compression + Encoding (game changer 🚀)
-- **zbase85/91/122**: zstd compression (level 9 default) + encoding
+- **zbase32**: zstd compression + Base32 (RFC 4648, DNS-safe, case-insensitive)
+- **zbase64**: zstd compression + Base64 (RFC 4648, standard encoding)
+- **zbase85/91/122**: zstd compression (level 9 default) + advanced encodings
 - **Result**: Typically 50-70% smaller than original, text-safe
 - **Use case**: Config files, CI/CD secrets, embedded data, URLs
 

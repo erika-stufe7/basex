@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(basex VERSION 0.9.0 LANGUAGES C)
+project(basex VERSION 0.9.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -46,6 +46,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Shared library - libbasex
 add_library(basex SHARED
+    src/libbasex/base32.c
+    src/libbasex/base64.c
     src/libbasex/base85.c
     src/libbasex/base91.c
     src/libbasex/base122.c
@@ -81,6 +83,14 @@ target_link_libraries(base122 basex)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(ZSTD REQUIRED libzstd)
 
+add_executable(zbase32 src/cli/zbase32_cli.c)
+target_link_libraries(zbase32 basex ${ZSTD_LIBRARIES})
+target_include_directories(zbase32 PRIVATE ${ZSTD_INCLUDE_DIRS})
+
+add_executable(zbase64 src/cli/zbase64_cli.c)
+target_link_libraries(zbase64 basex ${ZSTD_LIBRARIES})
+target_include_directories(zbase64 PRIVATE ${ZSTD_INCLUDE_DIRS})
+
 add_executable(zbase85 src/cli/zbase85_cli.c)
 target_link_libraries(zbase85 basex ${ZSTD_LIBRARIES})
 target_include_directories(zbase85 PRIVATE ${ZSTD_INCLUDE_DIRS})
@@ -105,7 +115,7 @@ if(BUILD_BENCHMARKS AND EXISTS ${CMAKE_SOURCE_DIR}/benchmarks)
 endif()
 
 # Installation
-install(TARGETS basex base85 base91 base122 zbase85 zbase91 zbase122
+install(TARGETS basex base85 base91 base122 zbase32 zbase64 zbase85 zbase91 zbase122
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
     PUBLIC_HEADER DESTINATION include
@@ -115,6 +125,8 @@ install(FILES
     man/base85.1
     man/base91.1
     man/base122.1
+    man/zbase32.1
+    man/zbase64.1
     man/zbase85.1
     man/zbase91.1
     man/zbase122.1

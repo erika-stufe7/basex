@@ -1,0 +1,72 @@
+.TH ZBASE32 1 "February 2026" "BaseX 0.9.1" "User Commands"
+.SH NAME
+zbase32 \- compress and encode data to Base32 format
+.SH SYNOPSIS
+.B zbase32
+[\fIOPTION\fR]... [\fIFILE\fR]
+.SH DESCRIPTION
+.B zbase32
+compresses data using Zstandard and encodes it to Base32 format (RFC 4648).
+Base32 uses only alphanumeric characters (A\-Z, 2\-7), making it safe for
+case\-insensitive systems and URLs.
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.SH OPTIONS
+.TP
+.BR \-d ", " \-\-decode
+Decode and decompress data (reverses the encoding + compression).
+.TP
+.BR \-w ", " \-\-wrap=\fICOLS\fR
+Wrap encoded lines after COLS characters (default 76). Use 0 for no wrapping.
+.TP
+.BR \-i ", " \-\-ignore\-garbage
+Ignore non\-alphabet characters when decoding (newlines, spaces, etc).
+.TP
+.BR \-l ", " \-\-level=\fINUM\fR
+Set compression level (1\-19, default 9). Higher values provide better
+compression but use more CPU time.
+.TP
+.BR \-T ", " \-\-threads=\fINUM\fR
+Number of compression threads (default 0 = auto). More threads speed up
+compression of large files.
+.TP
+.BR \-v ", " \-\-verbose
+Show compression statistics (bytes in/out, compression ratio).
+.TP
+.BR \-\-version
+Output version information and exit.
+.TP
+.BR \-\-help
+Display help message and exit.
+.SH EXAMPLES
+Compress and encode a file:
+.RS
+$ zbase32 document.pdf > document.zb32
+.RE
+.PP
+Decode and decompress:
+.RS
+$ zbase32 \-d document.zb32 > document.pdf
+.RE
+.PP
+Use in filenames (case\-insensitive safe):
+.RS
+$ zbase32 secret.key | tee $(zbase32 \-\-wrap=0 <<< "key").zb32
+.RE
+.SH PERFORMANCE
+Base32 encoding adds 60% size overhead (5 bytes → 8 chars). However,
+Zstandard compression typically achieves 2\-3x compression on text files,
+making the final size competitive with plain Base64.
+.PP
+Base32 is ideal when case\-insensitive safety is required (DNS, Windows
+filesystems, legacy systems).
+.SH SEE ALSO
+.BR base32 (1),
+.BR zbase64 (1),
+.BR zbase85 (1),
+.BR zstd (1)
+.SH AUTHOR
+Written for the BaseX project.
+.SH COPYRIGHT
+Copyright \(co 2026 BaseX Project.
+License MIT: <https://opensource.org/licenses/MIT>

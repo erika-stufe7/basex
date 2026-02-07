@@ -1,0 +1,72 @@
+.TH ZBASE64 1 "February 2026" "BaseX 0.9.1" "User Commands"
+.SH NAME
+zbase64 \- compress and encode data to Base64 format
+.SH SYNOPSIS
+.B zbase64
+[\fIOPTION\fR]... [\fIFILE\fR]
+.SH DESCRIPTION
+.B zbase64
+compresses data using Zstandard and encodes it to Base64 format (RFC 4648).
+This combines high compression ratios with standard Base64 encoding for
+compatibility with text-based protocols.
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.SH OPTIONS
+.TP
+.BR \-d ", " \-\-decode
+Decode and decompress data (reverses the encoding + compression).
+.TP
+.BR \-w ", " \-\-wrap=\fICOLS\fR
+Wrap encoded lines after COLS characters (default 76). Use 0 for no wrapping.
+.TP
+.BR \-i ", " \-\-ignore\-garbage
+Ignore non\-alphabet characters when decoding (newlines, spaces, etc).
+.TP
+.BR \-l ", " \-\-level=\fINUM\fR
+Set compression level (1\-19, default 9). Higher values provide better
+compression but use more CPU time.
+.TP
+.BR \-T ", " \-\-threads=\fINUM\fR
+Number of compression threads (default 0 = auto). More threads speed up
+compression of large files.
+.TP
+.BR \-v ", " \-\-verbose
+Show compression statistics (bytes in/out, compression ratio).
+.TP
+.BR \-\-version
+Output version information and exit.
+.TP
+.BR \-\-help
+Display help message and exit.
+.SH EXAMPLES
+Compress and encode a file:
+.RS
+$ zbase64 document.pdf > document.zb64
+.RE
+.PP
+Decode and decompress:
+.RS
+$ zbase64 \-d document.zb64 > document.pdf
+.RE
+.PP
+High compression with verbose output:
+.RS
+$ zbase64 \-l 19 \-v data.bin > data.zb64
+.RE
+.SH PERFORMANCE
+Base64 encoding adds 33% size overhead. However, Zstandard compression
+typically achieves 2\-3x compression on text files, resulting in smaller
+final size than plain Base64.
+.PP
+The compression + encoding pipeline is ~2x faster than separate
+compression and encoding steps.
+.SH SEE ALSO
+.BR base64 (1),
+.BR zbase32 (1),
+.BR zbase85 (1),
+.BR zstd (1)
+.SH AUTHOR
+Written for the BaseX project.
+.SH COPYRIGHT
+Copyright \(co 2026 BaseX Project.
+License MIT: <https://opensource.org/licenses/MIT>

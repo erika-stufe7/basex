@@ -13,7 +13,7 @@ extern "C" {
 /* Version information */
 #define BASEX_VERSION_MAJOR 0
 #define BASEX_VERSION_MINOR 9
-#define BASEX_VERSION_PATCH 0
+#define BASEX_VERSION_PATCH 1
 
 /* CPU feature detection */
 typedef struct {
@@ -34,6 +34,74 @@ basex_cpu_features_t basex_detect_cpu_features(void);
  * Print CPU features to stdout
  */
 void basex_print_cpu_info(void);
+
+/* Base32 encoding/decoding */
+
+/**
+ * Calculate required buffer size for Base32 encoding
+ * @param input_len Length of input data in bytes
+ * @return Required output buffer size in bytes
+ */
+size_t basex_base32_encode_len(size_t input_len);
+
+/**
+ * Calculate required buffer size for Base32 decoding
+ * @param input_len Length of encoded input in bytes
+ * @return Required output buffer size in bytes
+ */
+size_t basex_base32_decode_len(size_t input_len);
+
+/**
+ * Encode data to Base32 (RFC 4648)
+ * @param input Input data buffer
+ * @param input_len Input data length
+ * @param output Output buffer (must be large enough)
+ * @return Number of bytes written, or -1 on error
+ */
+ssize_t basex_base32_encode(const uint8_t* input, size_t input_len, char* output);
+
+/**
+ * Decode Base32 data
+ * @param input Input Base32 string
+ * @param input_len Input string length
+ * @param output Output buffer (must be large enough)
+ * @return Number of bytes written, or -1 on error
+ */
+ssize_t basex_base32_decode(const char* input, size_t input_len, uint8_t* output);
+
+/* Base64 encoding/decoding */
+
+/**
+ * Calculate required buffer size for Base64 encoding
+ * @param input_len Length of input data in bytes
+ * @return Required output buffer size in bytes
+ */
+size_t basex_base64_encode_len(size_t input_len);
+
+/**
+ * Calculate required buffer size for Base64 decoding
+ * @param input_len Length of encoded input in bytes
+ * @return Required output buffer size in bytes
+ */
+size_t basex_base64_decode_len(size_t input_len);
+
+/**
+ * Encode data to Base64 (RFC 4648)
+ * @param input Input data buffer
+ * @param input_len Input data length
+ * @param output Output buffer (must be large enough)
+ * @return Number of bytes written, or -1 on error
+ */
+ssize_t basex_base64_encode(const uint8_t* input, size_t input_len, char* output);
+
+/**
+ * Decode Base64 data
+ * @param input Input Base64 string
+ * @param input_len Input string length
+ * @param output Output buffer (must be large enough)
+ * @return Number of bytes written, or -1 on error
+ */
+ssize_t basex_base64_decode(const char* input, size_t input_len, uint8_t* output);
 
 /* Base85 encoding/decoding */
 
