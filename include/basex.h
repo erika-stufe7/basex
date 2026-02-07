@@ -13,7 +13,7 @@ extern "C" {
 /* Version information */
 #define BASEX_VERSION_MAJOR 0
 #define BASEX_VERSION_MINOR 9
-#define BASEX_VERSION_PATCH 1
+#define BASEX_VERSION_PATCH 2
 
 /* CPU feature detection */
 typedef struct {
