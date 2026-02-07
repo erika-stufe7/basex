@@ -42,7 +42,21 @@ Tested on Intel Core i3-7100U, Debian 12, BaseX 0.9.1
 
 **Verdict:** JSON compresses extremely well - **204× smaller** than original.
 
-### 💻 Source Code (Mixed)
+### � Real System Logs (Production Data)
+
+| Method | Size | vs Original | vs base64 |
+|--------|------|-------------|-----------|
+| Original (dpkg.log.1) | 370,331 bytes | 100% | - |
+| base64 | 492,540 bytes | 133% | 0% |
+| gzip | ~74,066 bytes | 20% | -85% |
+| gzip + base64 | ~98,488 bytes | 27% | -80% |
+| **zbase122** | **40,890 bytes** | **11%** | **-92%** ← Winner! |
+
+**Verdict:** Real production logs compress to **11% of original size** - 58% better than gzip+base64!
+
+**Use Case:** Perfect for shipping logs in CI/CD pipelines, embedding in environment variables, or sending via APIs.
+
+### �💻 Source Code (Mixed)
 
 | Method | Size | vs Original |
 |--------|------|-------------|

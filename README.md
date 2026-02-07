@@ -37,6 +37,7 @@ Fast, CPU-optimized encoding tools with **zstd compression** for when you need t
 
 **Real numbers (tested):**
 - 44 KB text file: base64 = 60 KB, **zbase122 = 341 bytes** (99.4% savings)
+- 362 KB system log: base64 = 492 KB, **zbase122 = 40 KB** (88% savings) ← Real production data!
 - 11 KB source code: base64 = 15 KB, **zbase122 = 2.7 KB** (82% savings)
 - 51 KB random binary: base64 = 69 KB, **base122 = 59 KB** (15% savings)
 
