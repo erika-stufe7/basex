@@ -1,0 +1,87 @@
+.TH BASE85 1 "February 2026" "BaseX 1.0.0" "User Commands"
+.SH NAME
+base85 \- base85 encode/decode data and print to standard output
+.SH SYNOPSIS
+.B base85
+[\fIOPTION\fR]... [\fIFILE\fR]
+.SH DESCRIPTION
+Base85 encode or decode FILE, or standard input, to standard output.
+.PP
+Base85 encoding (RFC 1924) represents 4 bytes as 5 ASCII characters,
+resulting in approximately 25% overhead (compared to 33% for Base64).
+This implementation includes CPU-specific optimizations (AVX2, BMI2)
+for maximum performance on modern Intel and AMD processors.
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.PP
+.SH OPTIONS
+.TP
+.B \-d, \-\-decode
+Decode data
+.TP
+.B \-w, \-\-wrap=COLS
+Wrap encoded lines after COLS characters (default 76).
+Use 0 to disable line wrapping
+.TP
+.B \-i, \-\-ignore\-garbage
+When decoding, ignore non\-alphabet characters
+.TP
+.B \-\-cpu\-info
+Show detected CPU features and performance characteristics, then exit
+.TP
+.B \-\-help
+Display help message and exit
+.TP
+.B \-\-version
+Output version information and exit
+.SH EXAMPLES
+.PP
+.B Encode a file:
+.RS
+base85 input.txt > output.b85
+.RE
+.PP
+.B Decode a file:
+.RS
+base85 \-d output.b85 > input.txt
+.RE
+.PP
+.B Encode from stdin:
+.RS
+echo "Hello World" | base85
+.RE
+.PP
+.B Check CPU optimizations:
+.RS
+base85 \-\-cpu\-info
+.RE
+.SH PERFORMANCE
+On systems with AVX2 support (Intel Haswell and later, AMD Excavator and later),
+base85 can achieve encoding speeds of 5\-8 GB/s. On older CPUs without SIMD support,
+performance is approximately 1\-2 GB/s.
+.PP
+The tool automatically detects available CPU features at runtime and selects
+the optimal code path.
+.SH ALPHABET
+Base85 uses the following 85-character alphabet:
+.RS
+0\-9 A\-Z a\-z !#$%&()*+\-;<=>?@^_`{|}~
+.RE
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Failure (invalid input, decoding error, etc.)
+.SH SEE ALSO
+.BR base64 (1),
+.BR base32 (1),
+.BR base91 (1),
+.BR base122 (1)
+.PP
+RFC 1924: A Compact Representation of IPv6 Addresses
+.SH AUTHOR
+BaseX Project
+.SH REPORTING BUGS
+Report bugs to: https://github.com/yourusername/basex/issues

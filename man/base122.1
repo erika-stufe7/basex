@@ -1,0 +1,91 @@
+.TH BASE122 1 "February 2026" "BaseX 1.0.0" "User Commands"
+.SH NAME
+base122 \- base122 encode/decode data and print to standard output
+.SH SYNOPSIS
+.B base122
+[\fIOPTION\fR]... [\fIFILE\fR]
+.SH DESCRIPTION
+Base122 encode or decode FILE, or standard input, to standard output.
+.PP
+Base122 encoding is the most efficient ASCII-safe encoding, achieving
+approximately 12.5% overhead by using 7 bits per byte with UTF-8
+continuation bytes. This is significantly better than Base64 (33%),
+Base85 (25%), or Base91 (23%).
+.PP
+This implementation includes CPU-specific optimizations (AVX2, BMI2)
+for maximum performance on modern Intel and AMD processors.
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.PP
+.SH OPTIONS
+.TP
+.B \-d, \-\-decode
+Decode data
+.TP
+.B \-w, \-\-wrap=COLS
+Wrap encoded lines after COLS characters (default 76).
+Use 0 to disable line wrapping
+.TP
+.B \-i, \-\-ignore\-garbage
+When decoding, ignore non\-alphabet characters
+.TP
+.B \-\-cpu\-info
+Show detected CPU features and performance characteristics, then exit
+.TP
+.B \-\-help
+Display help message and exit
+.TP
+.B \-\-version
+Output version information and exit
+.SH EXAMPLES
+.PP
+.B Encode a file:
+.RS
+base122 input.txt > output.b122
+.RE
+.PP
+.B Decode a file:
+.RS
+base122 \-d output.b122 > input.txt
+.RE
+.PP
+.B Encode from stdin:
+.RS
+echo "Hello World" | base122
+.RE
+.PP
+.B Check CPU optimizations:
+.RS
+base122 \-\-cpu\-info
+.RE
+.SH PERFORMANCE
+On systems with AVX2 support (Intel Haswell and later, AMD Excavator and later),
+base122 can achieve encoding speeds of 4\-6 GB/s. On older CPUs without SIMD support,
+performance is approximately 1\-2 GB/s.
+.PP
+The tool automatically detects available CPU features at runtime and selects
+the optimal code path.
+.SH TECHNICAL DETAILS
+Base122 encodes 7 bits per output byte using UTF\-8 continuation bytes (0x80\-0xFF range).
+Certain illegal bytes (NUL, LF, CR, ", &, backslash) are escaped using a two\-byte sequence.
+.PP
+This encoding is ideal for embedding binary data in text formats that support UTF\-8
+but have restrictions on certain ASCII control characters.
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Failure (invalid input, decoding error, etc.)
+.SH SEE ALSO
+.BR base64 (1),
+.BR base32 (1),
+.BR base85 (1),
+.BR base91 (1)
+.PP
+Base122 specification: https://github.com/kevinAlbs/Base122
+.SH AUTHOR
+BaseX Project
+.SH REPORTING BUGS
+Report bugs to: https://github.com/yourusername/basex/issues

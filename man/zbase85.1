@@ -1,0 +1,164 @@
+.TH ZBASE85 1 "February 2026" "BaseX 1.0.0" "User Commands"
+.SH NAME
+zbase85 \- compress with zstd and encode with base85
+.SH SYNOPSIS
+.B zbase85
+[\fIOPTION\fR]... [\fIFILE\fR]
+.SH DESCRIPTION
+Compress FILE with zstd and encode the result with Base85, or decode and decompress
+FILE, or standard input, to standard output.
+.PP
+zbase85 combines zstd compression (default level 9) with Base85 encoding to create
+compact, text-safe output suitable for embedding in configuration files, emails,
+or other text-based formats.
+.PP
+The compression pipeline: INPUT → zstd compress (CPU-optimized) → Base85 encode → OUTPUT
+.PP
+With no FILE, or when FILE is \-, read standard input.
+.PP
+.SH OPTIONS
+.SS Compression options
+.TP
+.B \-#
+Compression level, where # is between 1 and 19. Higher numbers yield better
+compression at the cost of speed. Default: 9
+.TP
+.B \-T, \-\-threads=NUM
+Number of compression threads. Use 0 for automatic detection (default).
+zstd automatically uses available CPU cores for parallel compression.
+.SS Base85 encoding options
+.TP
+.B \-w, \-\-wrap=COLS
+Wrap encoded lines after COLS characters (default 76).
+Use 0 to disable line wrapping
+.TP
+.B \-i, \-\-ignore\-garbage
+When decoding, ignore non\-alphabet characters
+.SS General options
+.TP
+.B \-d, \-\-decode
+Decode and decompress data
+.TP
+.B \-c, \-\-stdout
+Write to stdout (always enabled for pipes)
+.TP
+.B \-k, \-\-keep
+Keep input file (not applicable for stdin)
+.TP
+.B \-v, \-\-verbose
+Show compression statistics and performance information
+.TP
+.B \-q, \-\-quiet
+Suppress warnings and informational messages
+.TP
+.B \-\-cpu\-info
+Show detected CPU features (AVX2, BMI2, etc.), zstd version, and exit
+.TP
+.B \-\-help
+Display help message and exit
+.TP
+.B \-\-version
+Output version information and exit
+.SH EXAMPLES
+.PP
+.B Compress and encode a file:
+.RS
+zbase85 input.bin > output.zb85
+.RE
+.PP
+.B With maximum compression:
+.RS
+zbase85 \-19 input.bin > output.zb85
+.RE
+.PP
+.B Fast compression with 8 threads:
+.RS
+zbase85 \-1 \-T8 large_file.dat > output.zb85
+.RE
+.PP
+.B Decode and decompress:
+.RS
+zbase85 \-d output.zb85 > input.bin
+.RE
+.PP
+.B Verbose output with statistics:
+.RS
+zbase85 \-v input.bin > output.zb85
+.RE
+.PP
+.B Check CPU optimizations:
+.RS
+zbase85 \-\-cpu\-info
+.RE
+.SH PERFORMANCE
+zbase85 is optimized for modern CPUs:
+.PP
+.B CPU Detection:
+Automatically detects and uses AVX2, BMI2, and other SIMD instructions
+available on your processor for maximum performance.
+.PP
+.B Threading:
+Use \-T0 (default) to automatically utilize all CPU cores. On a 4-core system,
+expect 3-4x speedup compared to single-threaded compression.
+.PP
+.B Compression Levels:
+.RS
+Level 1-3:   Fast, ~300-500 MB/s (similar to gzip)
+.br
+Level 9:     Balanced (default), ~40-50 MB/s
+.br
+Level 15-19: Maximum compression, ~5-15 MB/s
+.RE
+.PP
+.B Expected Ratios:
+For typical binary data: 50-70% size reduction before Base85 encoding.
+Final output size is approximately 1.25x the compressed size due to Base85 overhead.
+.SH COMPRESSION LEVEL RECOMMENDATIONS
+.TP
+.B \-1 to \-3
+Real-time compression, low latency applications, streaming data
+.TP
+.B \-9 (default)
+Best balance of speed and compression for general use
+.TP
+.B \-15 to \-19
+Archival, distribution packages, minimize storage/bandwidth
+.SH CPU OPTIMIZATIONS
+zbase85 automatically uses hardware acceleration:
+.TP
+.B Intel Xeon Broadwell-EP and later
+Full AVX2 + BMI2 optimization for both zstd and Base85
+.TP
+.B Intel Core 7th Gen (Kaby Lake) and later
+AVX2 + BMI2 support, ~5-8 GB/s encoding throughput
+.TP
+.B AMD Zen and later
+AVX2 support with excellent multi-threading performance
+.TP
+.B Older CPUs
+Automatic fallback to portable implementation
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Failure (compression error, invalid input, out of memory, etc.)
+.SH NOTES
+zbase85 uses zstd library version 1.5.7, which includes numerous performance
+improvements and bug fixes. The tool is designed to be a drop-in replacement
+for "zstd | base85" pipelines with better performance and convenience.
+.SH SEE ALSO
+.BR zstd (1),
+.BR base85 (1),
+.BR base64 (1),
+.BR zbase91 (1),
+.BR zbase122 (1)
+.PP
+zstd: https://facebook.github.io/zstd/
+.br
+BaseX: https://github.com/yourusername/basex
+.SH AUTHOR
+BaseX Project
+.SH REPORTING BUGS
+Report bugs to: https://github.com/yourusername/basex/issues

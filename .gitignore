@@ -1,0 +1,37 @@
+# Build directories
+build/
+cmake-build-*/
+
+# Compiled files
+*.o
+*.so
+*.a
+*.dylib
+*.exe
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test outputs
+tests/output/
+*.log
+
+# Debian packaging
+*.deb
+*.ddeb
+*.changes
+*.dsc
+*.tar.gz
+.debhelper/
+debian/.debhelper/
+debian/basex/
+debian/files
+debian/*.substvars
+debian/*.log
+
+# Generated files
+compile_commands.json
