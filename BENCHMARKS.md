@@ -139,6 +139,37 @@ base64: 13.3 KB → Hits 1 MB etcd limit faster
 zbase122: 0.5 KB → 26× more configs per MB
 ```
 
+## Large File Test (25 MB Real-World JSON)
+
+**Source:** [GitHub Events JSON](https://raw.githubusercontent.com/json-iterator/test-data/refs/heads/master/large-file.json) (json-iterator test data)
+
+| Method | Size | vs Original | vs base64 | Time (25 MB) |
+|--------|------|-------------|-----------|--------------|
+| Original JSON | 26,141,343 bytes | 100% | - | - |
+| base64 | 35,313,745 bytes | 135% | 0% | 0.05s |
+| gzip + base64 | 5,204,426 bytes | 20% | -85% | 0.67s |
+| **zbase122** | **4,235,334 bytes** | **16%** | **-88%** | **0.59s** |
+
+**Honest Assessment:**
+
+✅ **vs base64:** zbase122 is massively better (88% smaller)  
+⚠️ **vs gzip+base64:** zbase122 is marginally better (19% smaller, similar speed)
+
+**Real advantages:**
+- **Simplicity:** One command (`zbase122`) vs pipeline (`gzip | base64`)
+- **Consistency:** Same tool for all use cases
+- **Slightly better compression:** zstd level 9 > gzip default
+- **Competitive performance:** 44 MB/s throughput
+
+**When gzip+base64 is better:**
+- When you already have both tools in your pipeline
+- When 19% size difference doesn't matter
+
+**When zbase122 is better:**
+- Simpler scripts (one tool, not two)
+- Slightly better compression matters (CI/CD caches, network transfer)
+- Consistency across your infrastructure (same tool for small and large files)
+
 ### URL Encoding
 ```bash
 # Embed 256-byte token in URL
