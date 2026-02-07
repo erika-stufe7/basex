@@ -204,45 +204,52 @@ zbase122 -19 -T0 important-file.bin
 
 ## Performance & Benchmarks
 
-### Encoding Performance (Intel Core i3-7100U @ 2.40GHz, AVX2)
+**⚠️ Real benchmarks tested on production hardware - February 7, 2026**  
+See [BENCHMARKS.md](BENCHMARKS.md) for complete methodology and test files.
 
-| Tool | Encoding | Decoding | Overhead | vs Base64 |
-|------|----------|----------|----------|-----------|
-| **base64** (reference) | 2.5 GB/s | 2.0 GB/s | **33%** | 0% |
-| **base85** | 6.2 GB/s | 5.8 GB/s | 25% | ✓ 24% smaller |
-| **base91** | 5.4 GB/s | 5.1 GB/s | 23% | ✓ 30% smaller |
-| **base122** | 4.8 GB/s | 4.5 GB/s | 12.5% | ✓ 62% smaller |
+### 📊 Realcompression Results
 
-### Compression + Encoding (zbaseXX)
+#### Text/JSON Data (Highly Compressible)
 
-**Test data: 10MB binary file (mixed entropy)**
+**Test:** 44 KB repetitive text file
 
-| Tool | Output Size | Time | Throughput | vs base64 |
-|------|-------------|------|------------|-----------|
-| `base64` | 13.3 MB | 4.0s | 2.5 GB/s | baseline |
-| `gzip \| base64` | 5.8 MB | 8.2s | 1.2 GB/s | -56% size |
-| **`zbase85 -9`** | **4.6 MB** | **2.1s** | **4.8 GB/s** | **✓ -65% size, 2x faster!** |
-| **`zbase91 -9`** | **4.5 MB** | **2.0s** | **5.0 GB/s** | **✓ -66% size** |
-| **`zbase122 -19`** | **4.1 MB** | **3.8s** | **2.6 GB/s** | **✓ -69% size** |
+| Method | Output Size | vs Base64 | Compression Ratio |
+|--------|-------------|-----------|-------------------|
+| base64 (reference) | 60 KB | 0% | 1.35× (worse) |
+| base122 (pure) | 52 KB | -14% | 1.16× |
+| **zbase64** | **398 bytes** | **-99.3%** | **0.9%** ✓ |
+| **zbase85** | **373 bytes** | **-99.4%** | **0.8%** ✓ |
+| **zbase122** | **341 bytes** | **-99.4%** | **0.8%** ✓ |
 
-**Key Insights:**
-- zbase85 is **2x faster** than `gzip | base64` while achieving better compression
-- Multi-threaded zstd scales linearly up to 8-16 cores
-- Level 9 provides best speed/compression balance for real-time use
-- Level 19 for maximum compression (archival, bandwidth-critical)
+**Verdict:** Text/JSON with zstd is **130-200× smaller** than base64. Use `zbase*` tools!
 
-### CPU Optimization Impact
+#### Source Code (Moderate Compression)
 
-| CPU Features | Encoding Speed | Notes |
-|--------------|----------------|-------|
-| AVX2 + BMI2 | 5-8 GB/s | Xeon Broadwell+, Core 7th Gen+ |
-| SSE4.2 only | 2-3 GB/s | Older Intel/AMD |
-| Portable (no SIMD) | 1-2 GB/s | Fallback |
+**Test:** 11.4 KB C source files
 
-**zstd compression** also benefits from CPU features:
-- Uses AVX2 for faster dictionary compression
-- Multi-threading scales to 64+ cores
-- Automatic runtime detection (no recompilation needed)
+| Method | Output Size | vs Base64 | Reduction |
+|--------|-------------|-----------|-----------|
+| base64 | 15.3 KB | 0% | - |
+| base122 (pure) | 13.1 KB | -14% | - |
+| **zbase122** | **2.75 KB** | **-82%** | ✓ |
+| zbase64 | 3.21 KB | -79% | ✓ |
+
+**Verdict:** Source code: **5.6× smaller** than base64 with zbase122.
+
+#### Random Binary (Incompressible)
+
+**Test:** 51 KB from /dev/urandom
+
+| Method | Output Size | Overhead | Note |
+|--------|-------------|----------|------|
+| base64 | 69 KB | +35% | Standard |
+| base85 | 65 KB | +27% | 6% better |
+| base91 | 64 KB | +25% | 8% better |
+| **base122** | **59 KB** | **+16%** | ✓ 15% better |
+| zbase64 | 69 KB | +35% | No benefit |
+| zbase122 | 59 KB | +16% | No benefit |
+
+**Verdict:** For random/compressed data, use **pure encoding** (base122). zstd adds no value.
 
 ## Encoding Comparison Deep-Dive
 
