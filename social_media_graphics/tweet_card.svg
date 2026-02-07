@@ -1,0 +1,43 @@
+<svg width="1200" height="675" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#grad2)"/>
+  
+  <!-- Main Content Box -->
+  <rect x="100" y="100" width="1000" height="475" rx="30" fill="white" opacity="0.98"/>
+  
+  <!-- Emoji/Icon -->
+  <text x="600" y="200" font-family="Arial, sans-serif" font-size="80" text-anchor="middle">
+    🚀
+  </text>
+  
+  <!-- Main Message -->
+  <text x="600" y="290" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#333" text-anchor="middle">
+    44 KB → 341 bytes
+  </text>
+  
+  <text x="600" y="350" font-family="Arial, sans-serif" font-size="36" fill="#555" text-anchor="middle">
+    That's 99.4% smaller!
+  </text>
+  
+  <!-- Explanation -->
+  <text x="600" y="420" font-family="Arial, sans-serif" font-size="28" fill="#777" text-anchor="middle">
+    BaseX: Compression + Efficient Encoding
+  </text>
+  
+  <text x="600" y="465" font-family="Arial, sans-serif" font-size="24" fill="#888" text-anchor="middle">
+    Open source • MIT License • Production ready
+  </text>
+  
+  <!-- URL -->
+  <rect x="350" y="490" width="500" height="50" rx="25" fill="#667eea"/>
+  <text x="600" y="525" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">
+    github.com/erika-stufe7/basex
+  </text>
+</svg>

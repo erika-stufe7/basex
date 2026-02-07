@@ -1,0 +1,106 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad1)"/>
+  
+  <!-- Title -->
+  <text x="600" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">
+    Base64 is Wasteful
+  </text>
+  <text x="600" y="130" font-family="Arial, sans-serif" font-size="32" fill="#e0e0e0" text-anchor="middle">
+    BaseX is 99% more efficient
+  </text>
+  
+  <!-- Main Stats Box -->
+  <rect x="100" y="180" width="1000" height="400" rx="20" fill="white" opacity="0.95"/>
+  
+  <!-- Column Headers -->
+  <text x="200" y="240" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">
+    Data Type
+  </text>
+  <text x="450" y="240" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">
+    base64
+  </text>
+  <text x="650" y="240" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">
+    zbase122
+  </text>
+  <text x="900" y="240" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#667eea">
+    Savings
+  </text>
+  
+  <!-- Row 1: Text -->
+  <line x1="120" y1="260" x2="1080" y2="260" stroke="#ddd" stroke-width="2"/>
+  <text x="200" y="300" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    44 KB Text
+  </text>
+  <text x="450" y="300" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    60 KB
+  </text>
+  <text x="650" y="300" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#27ae60">
+    341 bytes
+  </text>
+  <text x="900" y="300" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#667eea">
+    99.4%
+  </text>
+  
+  <!-- Row 2: JSON -->
+  <line x1="120" y1="320" x2="1080" y2="320" stroke="#ddd" stroke-width="2"/>
+  <text x="200" y="360" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    48 KB JSON
+  </text>
+  <text x="450" y="360" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    65 KB
+  </text>
+  <text x="650" y="360" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#27ae60">
+    234 bytes
+  </text>
+  <text x="900" y="360" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#667eea">
+    99.6%
+  </text>
+  
+  <!-- Row 3: Code -->
+  <line x1="120" y1="380" x2="1080" y2="380" stroke="#ddd" stroke-width="2"/>
+  <text x="200" y="420" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    11 KB Code
+  </text>
+  <text x="450" y="420" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    15 KB
+  </text>
+  <text x="650" y="420" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#27ae60">
+    2.7 KB
+  </text>
+  <text x="900" y="420" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#667eea">
+    82%
+  </text>
+  
+  <!-- Row 4: Binary -->
+  <line x1="120" y1="440" x2="1080" y2="440" stroke="#ddd" stroke-width="2"/>
+  <text x="200" y="480" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    51 KB Binary
+  </text>
+  <text x="450" y="480" font-family="Arial, sans-serif" font-size="22" fill="#555">
+    69 KB
+  </text>
+  <text x="650" y="480" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#27ae60">
+    59 KB
+  </text>
+  <text x="900" y="480" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#667eea">
+    15%
+  </text>
+  
+  <!-- Footer -->
+  <text x="600" y="540" font-family="Arial, sans-serif" font-size="20" fill="#555" text-anchor="middle">
+    github.com/erika-stufe7/basex
+  </text>
+  
+  <!-- Tagline -->
+  <text x="600" y="570" font-family="Arial, sans-serif" font-size="18" font-style="italic" fill="#888" text-anchor="middle">
+    Compression + Efficient Encoding = Massive Savings
+  </text>
+</svg>

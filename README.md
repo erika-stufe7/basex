@@ -4,9 +4,14 @@
 
 Fast, CPU-optimized encoding tools with **zstd compression** for when you need text-safe output that doesn't waste bandwidth.
 
+[![GitHub release](https://img.shields.io/github/v/release/erika-stufe7/basex?color=blue)](https://github.com/erika-stufe7/basex/releases/latest)
+[![GitHub stars](https://img.shields.io/github/stars/erika-stufe7/basex?style=social)](https://github.com/erika-stufe7/basex/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub issues](https://img.shields.io/github/issues/erika-stufe7/basex)](https://github.com/erika-stufe7/basex/issues)
 [![Platform: Linux](https://img.shields.io/badge/Platform-Linux-blue.svg)](https://www.linux.org/)
+[![C Standard](https://img.shields.io/badge/C-C11-blue.svg)](https://en.cppreference.com/w/c/11)
 [![zstd: 1.5.7](https://img.shields.io/badge/zstd-1.5.7-green.svg)](https://github.com/facebook/zstd)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/erika-stufe7/basex/pulls)
 
 ## Why BaseX?
 
